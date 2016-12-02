@@ -57,47 +57,100 @@ perm = 4.95e-5; % Magnetic permeability in vacuum [T-in/A]
 N = 40; % Number of coil turns
 a = 49.2126; % Half the length of one side of the coil [in]
 gama = 0.53; % Ratio between the distance between the coils and 2a
-Bz = xyz(3)*0.000000001; % Magnetic field on z-axis [T]
+%Bx = xyz(1)*0.000000001
+%By = xyz(2)*0.000000001
+Bz = xyz(3)*0.000000001 % Magnetic field on z-axis [T]
+
+%Ix = (Bx*pi*a*(1+gama^2)*sqrt(2+gama^2))/(4*perm*N);
+%Vx = VoltageCalculationX(Ix);
+
+%Iy = (By*pi*a*(1+gama^2)*sqrt(2+gama^2))/(4*perm*N);
+%Vy = VoltageCalculationY(Iy);
 
 Iz = (Bz*pi*a*(1+gama^2)*sqrt(2+gama^2))/(4*perm*N);
-Vz = VoltageCalculation(Iz);
+Vz = VoltageCalculationZ(Iz);
 
-% Instrument
-g = gpib('agilent',7,5); % Creates GPIB object associated to a Agilent instrument (board index 7 and primary address 5) 
-fopen(g); % Connecting with instrument
-g.EOSMode = 'read&write';
-g.EOSCharCode = 'LF'
+% Instruments 
+%ga = gpib('agilent',7,5);
+gb = gpib('agilent',7,5); % Creates GPIB object associated to a Agilent instrument (board index 7 and primary address 5)
+%gc = gpib('agilent',7,5);
 
-% Program body: Sending SCPI commands to the power supply
+% Connecting with instrument
+%fopen(ga); 
+%ga.EOSMode = 'read&write';
+%ga.EOSCharCode = 'LF'
 
-fprintf(g,'*IDN?');
-idSupply = fscanf(g)
-fprintf(g,'VOLT?');
-vSupply = fscanf(g)
-fprintf(g,'MEAS:CURR?');
-iSupply = fscanf(g)
+fopen(gb);
+gb.EOSMode = 'read&write';
+gb.EOSCharCode = 'LF'
 
-fprintf(g,'CURR 4'); % Current limit value
+%fopen(gc); 
+%gc.EOSMode = 'read&write';
+%gc.EOSCharCode = 'LF'
+
+% Program body: Sending SCPI/COMP commands to the power supplies
+
+%fprintf(ga,'ID?');
+%idSupplyA = fscanf(ga)
+%fprintf(ga,'VOUT?');
+%vSupplyA = fscanf(ga)
+%fprintf(ga,'IOUT?');
+%iSupplyA = fscanf(ga)
+
+%fprintf(ga,'ISET 4'); % Current limit value
+
+fprintf(gb,'*IDN?');
+idSupplyB = fscanf(gb)
+fprintf(gb,'VOLT?');
+vSupplyB = fscanf(gb)
+fprintf(gb,'MEAS:CURR?');
+iSupplyB = fscanf(gb)
+
+fprintf(gb,'CURR 4'); % Current limit value
+
+%fprintf(gc,'ID?');
+%idSupplyC = fscanf(gC)
+%fprintf(gc,'VOUT?');
+%vSupplyC = fscanf(gc)
+%fprintf(gc,'IOUT?');
+%iSupplyC = fscanf(gc)
+
+%fprintf(gc,'ISET 4'); % Current limit value
 
 % Output voltage limit
 
+outputString = sprintf('VSET %d', Vx);
+fprintf(ga,outputString);
+
+outputString = sprintf('VSET %d', Vy);
+fprintf(gc,outputString);
+
 outputString = sprintf('VOLT %d', Vz);
-fprintf(g,outputString);
+fprintf(gb,outputString);
+
 
 %for n = 0:1:Vz
  %   outputString = sprintf('VOLT %d', n);
   %  fprintf(g,outputString);
     
   %  fprintf(g,'SYST:ERR?');
-   % erro = fscanf(g);
-   % if (erro ~= 0)
+   % error = fscanf(g);
+   % if (error ~= 0)
     %    fprintf(g,'*CLS');
      %   fprintf(g, 'OUTP 1');
    % end    
 %end
 
-% Fim do corpo do programa
+% End of program body
 
-fclose(g); % Closes connection
-delete(g); % Erases GPIB object
-clear g;
+fclose(ga); % Closes connection
+delete(ga); % Erases GPIB object A
+clear ga;
+
+fclose(gb); % Closes connection
+delete(gb); % Erases GPIB object B
+clear gb;
+
+fclose(gc); % Closes connection
+delete(gc); % Erases GPIB object C
+clear gc;
